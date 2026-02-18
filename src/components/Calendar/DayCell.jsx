@@ -1,8 +1,11 @@
-import React from 'react';
-import { Paper, Box, Typography, Zoom } from '@mui/material';
+import React, { useState } from 'react';
+import { Paper, Box, Typography, IconButton, Menu, MenuItem, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
+import { MoreVert as MoreIcon, Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
+import { useDispatch } from 'react-redux';
+import { deleteMood } from '../../redux/moodSlice';
 
-// Mapa de colores para cada emoji
+// Mapa de colores para cada emoji (igual que antes)
 const MOOD_COLORS = {
     '😊': '#4caf50',
     '😐': '#ffc107',
@@ -14,7 +17,6 @@ const MOOD_COLORS = {
     '🎉': '#ff9800',
 };
 
-// Celda con efectos hover
 const StyledDayCell = styled(Paper)(({ theme, moodcolor, hasmood }) => ({
     height: '100px',
     display: 'flex',
@@ -29,40 +31,54 @@ const StyledDayCell = styled(Paper)(({ theme, moodcolor, hasmood }) => ({
     overflow: 'hidden',
     borderRadius: theme.spacing(1.5),
     
-    '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%)',
-    opacity: 0,
-    transition: 'opacity 0.3s',
-    },
-
     '&:hover': {
     transform: 'scale(1.05) translateY(-5px)',
     boxShadow: theme.shadows[8],
-    '&::before': {
+    '& .menu-button': {
         opacity: 1,
     },
-    '& .day-number': {
-        transform: 'scale(1.2)',
-    },
-    },
-
-    '&:active': {
-    transform: 'scale(0.98)',
     },
 }));
 
 const DayCell = ({ day, date, mood, onClick }) => {
+    const dispatch = useDispatch();
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [openDialog, setOpenDialog] = useState(false);
+    
     const hasMood = mood && mood.emoji;
     const moodColor = hasMood ? MOOD_COLORS[mood.emoji] : '#f0f0f0';
 
+    const handleMenuClick = (event) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = (event) => {
+    if (event) event.stopPropagation();
+    setAnchorEl(null);
+    };
+
+    const handleEdit = (event) => {
+    handleMenuClose(event);
+    onClick(); // Abre el selector de ánimo
+    };
+
+    const handleDeleteClick = (event) => {
+    handleMenuClose(event);
+    setOpenDialog(true);
+    };
+
+    const handleDeleteConfirm = () => {
+    dispatch(deleteMood(date));
+    setOpenDialog(false);
+    };
+
+    const handleDeleteCancel = () => {
+    setOpenDialog(false);
+    };
+
     return (
-    <Zoom in={true} style={{ transitionDelay: `${day * 10}ms` }}>
+    <>
         <StyledDayCell
         elevation={hasMood ? 3 : 1}
         moodcolor={moodColor}
@@ -70,6 +86,47 @@ const DayCell = ({ day, date, mood, onClick }) => {
         onClick={onClick}
         data-testid={`day-${day}`}
         >
+        {/* Menú de opciones (solo si hay mood) */}
+        {hasMood && (
+            <>
+            <IconButton
+                className="menu-button"
+                size="small"
+                onClick={handleMenuClick}
+                sx={{
+                position: 'absolute',
+                top: 2,
+                right: 2,
+                opacity: 0,
+                transition: 'opacity 0.2s',
+                color: 'white',
+                backgroundColor: 'rgba(0,0,0,0.2)',
+                '&:hover': {
+                    backgroundColor: 'rgba(0,0,0,0.4)',
+                },
+                }}
+            >
+                <MoreIcon fontSize="small" />
+            </IconButton>
+            
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <MenuItem onClick={handleEdit}>
+                <EditIcon fontSize="small" sx={{ mr: 1 }} />
+                Editar
+                </MenuItem>
+                <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
+                <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+                Eliminar
+                </MenuItem>
+            </Menu>
+            </>
+        )}
+
         <Typography 
             variant="h6" 
             className="day-number"
@@ -83,18 +140,16 @@ const DayCell = ({ day, date, mood, onClick }) => {
         </Typography>
         
         {hasMood && (
-            <Zoom in={true} timeout={300}>
             <Box sx={{ 
-                fontSize: '2rem',
-                animation: 'float 3s ease-in-out infinite',
-                '@keyframes float': {
+            fontSize: '2rem',
+            animation: 'float 3s ease-in-out infinite',
+            '@keyframes float': {
                 '0%, 100%': { transform: 'translateY(0px)' },
                 '50%': { transform: 'translateY(-5px)' },
-                },
+            },
             }}>
-                {mood.emoji}
+            {mood.emoji}
             </Box>
-            </Zoom>
         )}
         
         {mood?.nota && (
@@ -116,11 +171,33 @@ const DayCell = ({ day, date, mood, onClick }) => {
             </Typography>
         )}
         </StyledDayCell>
-    </Zoom>
-    );
+
+      {/* Diálogo de confirmación para eliminar */}
+        <Dialog
+        open={openDialog}
+        onClose={handleDeleteCancel}
+        onClick={(e) => e.stopPropagation()}
+        >
+        <DialogTitle>¿Eliminar registro?</DialogTitle>
+        <DialogContent>
+            <DialogContentText>
+            ¿Estás seguro de que quieres eliminar el registro del día {day}?
+            Esta acción no se puede deshacer.
+            </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={handleDeleteCancel} color="primary">
+            Cancelar
+            </Button>
+            <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Eliminar
+            </Button>
+        </DialogActions>
+        </Dialog>
+    </>
+    );    
 };
 
-// PropTypes con valores por defecto
 DayCell.defaultProps = {
     mood: null,
 };

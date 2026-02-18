@@ -50,7 +50,7 @@ const CalendarView = () => {
     
     // Cabecera de días de la semana
     const header = weekDays.map(day => (
-        <Grid item xs={12/7} key={`header-${day}`}>
+        <Grid size={{ xs: 12/7 }} key={`header-${day}`}>
         <Typography align="center" fontWeight="bold" color="text.secondary">
             {day}
         </Typography>
@@ -60,7 +60,7 @@ const CalendarView = () => {
     // Días vacíos del principio
     for (let i = 0; i < startDay; i++) {
         days.push(
-        <Grid item xs={12/7} key={`empty-start-${i}`}>
+        <Grid size={{ xs: 12/7 }} key={`empty-start-${i}`}>
             <Box sx={{ height: '100px', opacity: 0.3 }} />
         </Grid>
         );
@@ -72,7 +72,7 @@ const CalendarView = () => {
         const moodRecord = registros.find(r => r.fecha === dateStr);
         
         days.push(
-        <Grid item xs={12/7} key={dateStr}>
+        <Grid size={{ xs: 12/7 }} key={dateStr}>
             <DayCell 
             day={day} 
             date={dateStr}
@@ -93,7 +93,7 @@ const CalendarView = () => {
     
     for (let i = 0; i < remainingCells; i++) {
         days.push(
-        <Grid item xs={12/7} key={`empty-end-${i}`}>
+        <Grid size={{ xs: 12/7 }} key={`empty-end-${i}`}>
             <Box sx={{ height: '100px', opacity: 0.3 }} />
         </Grid>
         );
@@ -137,11 +137,11 @@ const CalendarView = () => {
       {/* Estadísticas rápidas del mes */}
         <Paper elevation={2} sx={{ p: 2, mb: 3, bgcolor: 'info.light', color: 'info.contrastText' }}>
         <Grid container spacing={2}>
-            <Grid item xs={6}>
+            <Grid size={{ xs: 6 }}>
             <Typography variant="body2">Días registrados:</Typography>
             <Typography variant="h6">{monthStats.total}</Typography>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{ xs: 6 }}>
             <Typography variant="body2">Índice de felicidad:</Typography>
             <Typography variant="h6">{monthStats.happiness}% 😊</Typography>
             </Grid>
@@ -173,6 +173,7 @@ const CalendarView = () => {
         <NoteForm 
             fecha={selectedDayData.fecha}
             initialNote={selectedDayData?.nota || ''}
+            initialRating={selectedDayData?.rating || 3}
             onNoteSaved={() => setShowSuccess(true)}
         />
         )}
@@ -188,7 +189,7 @@ const CalendarView = () => {
             ¡Estado de ánimo guardado! ✨
         </Alert>
         </Snackbar>
-    </Box>
+        </Box>
     );
 };
 
