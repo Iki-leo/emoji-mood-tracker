@@ -1,3 +1,23 @@
+
+# Emoji Mood Tracker
+
+## Comandos útiles
+
+```bash
+# Iniciar el servidor de desarrollo
+npm start
+
+# Ejecutar tests
+npm test
+
+# Crear build para producción
+npm run build
+
+# Subir cambios a GitHub
+git add .
+git commit -m "mensaje descriptivo"
+git push
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
