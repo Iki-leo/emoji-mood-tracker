@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, IconButton, Badge } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Badge } from '@mui/material';  // ELIMINAMOS IconButton
 import { 
     Home as HomeIcon, 
     Timeline as StatsIcon, 
